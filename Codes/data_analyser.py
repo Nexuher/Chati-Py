@@ -138,10 +138,9 @@ def Data_Analyser(socket, secrets):
     sorted_dict_message = dict(sorted(word_counter.items(), key=lambda item: item[1], reverse=True))
 
     #   Every 100 messages update the data files
-    if messages_sent_by_users % 1 == 0:
+    if messages_sent_by_users % 100 == 0:
         update_data_files(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
         update_json_files(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
-        #league_analyser.update_league_file()
 
 def update_data_files(user_list, message_list, message_count):
     global secrets_store
