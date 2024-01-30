@@ -22,27 +22,3 @@ Kindly note that the current version of Chati_Py may contain a few bugs as it's 
 Rest assured, I am actively dedicated to addressing these issues and consistently implementing fixes on a daily basis. 
 
 Your understanding and patience are sincerely appreciated as I pursue to elevate the stability and performance of Chati_Py.
-
-## Data saved 
-
-Example of .txt and json file:
-{
-    "Livestream Information": {
-        "Date": "1-29-2024",
-        "Timezone": "UTC",
-        "Hour turned on": "1600",
-        "Nickname on chat": "example_nickname_1",
-        "Twitch Stream Link": "www.twitch.tv/{twitch_streamer_name}",
-        "Messages sent overall": 28
-    },
-    "Nickname list": {
-        "nightbot": 4,
-        "user_one" : 3
-        "user_three" : 1
-    },
-    "Messages list": {
-        "message_one": 6,
-        "message_two": 4,
-        "aaaa": 1,
-    }
-}
