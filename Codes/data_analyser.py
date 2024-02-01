@@ -1,29 +1,24 @@
 import string
 import sys
-import os
 import datetime
 import pytz
-import json
-
+import file_handlers
 from datetime import datetime
 
 #   Name of channel we're gonna be inspecting
 channel = "#" + str(sys.argv[1])
 
-LEC_Livestreams = False
-
-word_counter = {}
-nickname_list = {}
-
-timezone = pytz.timezone('Europe/Warsaw')
-datatime_information_set = datetime.now(timezone)
-
-date_string_formatted = f"{datatime_information_set.month}-{datatime_information_set.day}-{datatime_information_set.year}"
-hour_string_formatted = f"{datatime_information_set.hour}{datatime_information_set.minute}"
-
 #   Holder for private data
 secrets_store = {}
 
+#   Amount of overall messages sent by users on chat throughout the livestream
+messages_sent_by_users = 0
+
+#   List containing words and nicknames that got caught by algorithm
+word_counter = {}
+nickname_list = {}
+
+#   Setting up correct alphabet consisting lower, uppercases, special characters and all numbers
 good_characters = list(string.ascii_lowercase + string.ascii_uppercase)
 numbers = list(string.digits)
 special_characters = [
@@ -35,26 +30,13 @@ special_characters = [
 #   All of the correct numbers, letters and special characters in english alphabet 
 correct_unicode_list = numbers + good_characters + special_characters
 
-#   Amount of overall messages sent by users on chat throughout the livestream
-messages_sent_by_users = 0
+#   Acquiring information relating the data by using pytz and datetime
+timezone = pytz.timezone('Europe/Warsaw')
+datatime_information_set = datetime.now(timezone)
 
-def create_directory_to_file(channel_name, file_name):
-    directory_path = f"Data_Gathered/{channel_name}/{date_string_formatted}"
-    os.makedirs(directory_path, exist_ok=True)
+date_string_formatted = f"{datatime_information_set.month}-{datatime_information_set.day}-{datatime_information_set.year}"
+hour_string_formatted = f"{datatime_information_set.hour}{datatime_information_set.minute}"
 
-#   Construct the full path to the file, including the directory
-    file_path = os.path.join(directory_path, file_name)
-
-    return file_path
-
-def determine_file_name(channel_name):
-    # Determine name of the file
-    if LEC_Livestreams:
-        file_name = f"LEC_Week3_Day3_Analysis_{hour_string_formatted}_{date_string_formatted}.txt"
-    else:
-        file_name = channel_name + f"_Analysis_{hour_string_formatted}_{date_string_formatted}.txt"
-
-    return file_name
 
 #   Grab nickname and message sent by user from the call taken from resp
 def format_user_message(resp):
@@ -86,7 +68,7 @@ def Data_Analyser(socket, secrets):
     resp = socket.recv(2048).decode('utf-8')
 
 #   Sometimes twitch returns message PING to check if we're still using channel 
-#   Just return socket.send PONG to confirm it
+#   Return socket.send PONG to confirm it
 
     if resp.startswith('PING'):
         print("PING MESSAGE")
@@ -106,9 +88,6 @@ def Data_Analyser(socket, secrets):
 
     for word in user_message:
         correct_word = True
-
-        # if LEC_Livestreams:
-            #league_analyser.main(word)
 
         for letter in word:
             if letter not in correct_unicode_list:
@@ -131,77 +110,11 @@ def Data_Analyser(socket, secrets):
 
     messages_sent_by_users += 1
 
-    #   Sorting:
-    #   Nicknames by the amount they typed the message on chat
-    #   Messages by the amount they occured on chat
+    #   Sorting nicknames and messages
     sorted_dict_nickname = dict(sorted(nickname_list.items(), key=lambda item: item[1], reverse=True))
     sorted_dict_message = dict(sorted(word_counter.items(), key=lambda item: item[1], reverse=True))
 
     #   Every 100 messages update the data files
     if messages_sent_by_users % 1 == 0:
-        update_data_files(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
-        update_json_files(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
-        #league_analyser.update_league_file()
-
-def update_data_files(user_list, message_list, message_count):
-    global secrets_store
-
-    channel_name = channel.replace("#","")
-    file_name = determine_file_name(channel_name)
-
-    # Handle where file would go
-    file_directory = create_directory_to_file(channel_name, file_name)
-    file_handler = open(f"{file_directory}","w")
-
-    # Basic content of TXT file, 
-    list_message = f"""
-        {channel_name} live stream information for:
-
-        -------------------------------------------------------------
-        | Date:                     {date_string_formatted}   
-        | Hour turned on:           {hour_string_formatted} UTC
-        | Nickname on chat:         {secrets_store["account_nickname"]}              
-        | Twitch_stream_link:       www.twitch.tv/{channel_name}    
-        | Messages sent overall:    {message_count}                 
-        -------------------------------------------------------------
-        
-        User messsage's sent list:
-            {user_list}
-        <------------------------------------------->
-        Messages sent list:
-            {message_list}
-    """
-
-    # Input it to the file, close it
-    file_handler.write(list_message)
-    file_handler.close()
-
-def update_json_files(user_list, message_list, message_count):
-    global secrets_store
-    
-    channel_name = channel.replace("#","")
-    channel_link = "www.twitch.tv/" + channel_name
-
-    file_name = file_name = determine_file_name(channel_name)
-
-    # Handle where file would go
-    file_directory = create_directory_to_file(channel_name, file_name)
-    file_handler = open(f"{file_directory}","w")
-
-    # Basic content of JSON file, 
-    updated_set_of_information = {
-        "Livestream Information": {
-            "Date": date_string_formatted,
-            "Timezone": "UTC",
-            "Hour turned on": hour_string_formatted, 
-            "Nickname on chat": secrets_store["account_nickname"],
-            "Twitch Stream Link": channel_link,
-            "Messages sent overall": message_count
-        },
-        "Nickname list": user_list,
-        "Messages list": message_list
-    }
-
-    # Input it to the file, close it
-    json_object = json.dumps(updated_set_of_information, indent=4)
-    file_handler.write(json_object)
+        file_handlers.update_text_data_file(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
+        file_handlers.update_json_data_file(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
