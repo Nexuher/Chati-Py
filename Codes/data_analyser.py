@@ -18,7 +18,8 @@ messages_sent_by_users = 0
 word_counter = {}
 nickname_list = {}
 
-#   Setting up correct alphabet consisting lower, uppercases, special characters and all numbers
+#   Setting up correct alphabet: 
+#   lower, uppercases, special characters and all numbers
 good_characters = list(string.ascii_lowercase + string.ascii_uppercase)
 numbers = list(string.digits)
 special_characters = [
@@ -68,7 +69,7 @@ def Data_Analyser(socket, secrets):
     resp = socket.recv(2048).decode('utf-8')
 
 #   Sometimes twitch returns message PING to check if we're still using channel 
-#   Return socket.send PONG to confirm it
+#   Return PONG to confirm it
 
     if resp.startswith('PING'):
         print("PING MESSAGE")
@@ -77,14 +78,14 @@ def Data_Analyser(socket, secrets):
 
     user_nickname, user_message = format_user_message(resp)
 
-#   Appending to nickname list
+#   Add nick to nickname list
 
     if user_nickname in nickname_list:
         nickname_list[user_nickname] += 1
     else:
         nickname_list[user_nickname] = 1
 
-#   Appending to Word list
+#   Add word to word list
 
     for word in user_message:
         correct_word = True
@@ -110,11 +111,11 @@ def Data_Analyser(socket, secrets):
 
     messages_sent_by_users += 1
 
-    #   Sorting nicknames and messages
+#   Sorting nicknames and messages
     sorted_dict_nickname = dict(sorted(nickname_list.items(), key=lambda item: item[1], reverse=True))
     sorted_dict_message = dict(sorted(word_counter.items(), key=lambda item: item[1], reverse=True))
 
-    #   Every 100 messages update the data files
-    if messages_sent_by_users % 1 == 0:
+#   Every 100 messages update the data files
+    if messages_sent_by_users % 100 == 0:
         file_handlers.update_text_data_file(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)
         file_handlers.update_json_data_file(sorted_dict_nickname, sorted_dict_message, messages_sent_by_users)

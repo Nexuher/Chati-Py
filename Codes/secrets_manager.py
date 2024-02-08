@@ -2,6 +2,7 @@ import json
 
 secrets_store = {}
 
+# Load up private data
 def get_secrets():
     global secrets_store
 

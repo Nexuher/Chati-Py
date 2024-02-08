@@ -8,6 +8,7 @@ from datetime import datetime
 
 secrets_manager.get_secrets()
 
+# Channel name we're inspecting
 channel = "#" + str(sys.argv[1])
 
 #   Acquiring information relating the data by using pytz and datetime
@@ -15,7 +16,7 @@ timezone = pytz.timezone('Europe/Warsaw')
 datatime_information_set = datetime.now(timezone)
 
 date_string_formatted = f"{datatime_information_set.month}-{datatime_information_set.day}-{datatime_information_set.year}"
-hour_string_formatted = f"{datatime_information_set.hour}{datatime_information_set.minute}"
+hour_string_formatted = f"{datatime_information_set.hour};{datatime_information_set.minute}"
 
 
 def create_directory_to_file(channel_name, file_name):
@@ -32,14 +33,13 @@ def update_text_data_file(user_list, message_list, message_count):
     global secrets_store
 
     channel_name = channel.replace("#","")
-    file_name = channel_name + f"_Analysis_{hour_string_formatted}_{date_string_formatted}.txt"
+    new_file_name = channel_name + f"_Analysis_{hour_string_formatted}_{date_string_formatted}.txt"
 
     # Handle where file would go
-    file_directory = create_directory_to_file(channel_name, file_name)
+    file_directory = create_directory_to_file(channel_name, new_file_name)
     file_handler = open(f"{file_directory}","w")
 
-    # Basic content of TXT file, 
-    list_message = f"""
+    file_text_content = f"""
         {channel_name} live stream information for:
 
         -------------------------------------------------------------
@@ -58,7 +58,7 @@ def update_text_data_file(user_list, message_list, message_count):
     """
 
     # Input it to the file, close it
-    file_handler.write(list_message)
+    file_handler.write(file_text_content)
     file_handler.close()
 
 
@@ -75,7 +75,7 @@ def update_json_data_file(user_list, message_list, message_count):
     file_handler = open(f"{file_directory}","w")
 
     # Basic content of JSON file, 
-    updated_set_of_information = {
+    file_text_content = {
         "Livestream Information": {
             "Date": date_string_formatted,
             "Timezone": "UTC",
@@ -89,5 +89,5 @@ def update_json_data_file(user_list, message_list, message_count):
     }
 
     # Input it to the file, close it
-    json_object = json.dumps(updated_set_of_information, indent=4)
+    json_object = json.dumps(file_text_content, indent=4)
     file_handler.write(json_object)

@@ -10,15 +10,7 @@ port = 6667
 channel = "#" + str(sys.argv[1])
 secrets = {}
 
-#   Twitch sends testing messages, why?
-#   God if I know, just call those two and don't do anything with them
-def pass_testing_messages(socket):
-    test_resp = socket.recv(2048).decode('utf-8')
-    ANOTHER_test_resp = socket.recv(2048).decode('utf-8')
-
-
-#   Experimental to check whether the live is still working,
-#   Spoiler, the code doesn't work, sometimes it throws error and can't figure out why
+# Experimental function, doesnt work and isnt used
 def check_livestream_status():
     channel_name_formatted = channel.replace("#","")
 
@@ -37,13 +29,12 @@ def main():
 #   Create the socket, flick it to Data_analyser
     socket = socket_manager.create_socket(server, port, secrets_manager.secrets_store["account_nickname"], secrets_manager.secrets_store["token"], channel)
 
-#   Call two messages sent by Twitch I presume
-    pass_testing_messages(socket)
+#   Call two messages sent by Twitch 
+    socket_manager.pass_testing_messages(socket)
     
     Logger.handle_logs("INFO", "Chati_Py is running")
     print("Active")
 
-#   Constantly check if livestream is live, if so then go and analyse the messages
     while True:
         try:
             Data_Analyser(socket, secrets_manager.secrets_store)
