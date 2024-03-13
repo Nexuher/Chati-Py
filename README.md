@@ -17,4 +17,4 @@ This Python-based application leverages JSON and TXT files for seamless function
 
 **[Experimental Version / BUGGY]**
 
-Kindly note that the current version of Chati_Py may contain a few bugs as it's constantly under development. 
+Kindly note that the current version of Chati_Py may contain a few bugs as it's under occasional development as a side project. 
